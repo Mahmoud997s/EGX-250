@@ -52,7 +52,7 @@ function loadCheckpoint() {
 
 // --- Parsing CLI Arguments ---
 const args = process.argv.slice(2);
-const modeArg = args.find(a => a.startsWith('--mode='))?.split('=')[1] || 'phase1';
+const modeArg = args.find(a => a.startsWith('--mode='))?.split('=')[1] || 'phase3';
 
 let IS_HEADLESS = true;
 let MAX_SYMBOLS = 250;
