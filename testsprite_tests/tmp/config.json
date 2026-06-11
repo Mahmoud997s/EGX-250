@@ -1,0 +1,18 @@
+{
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "backendAuthType": "public",
+  "executionArgs": {
+    "projectName": "egx-scraper-poc",
+    "projectPath": "C:\\Users\\DELL\\Desktop\\Baba\\egx-scraper-poc",
+    "testIds": [],
+    "additionalInstruction": "",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-lmx3f77-QpJjNSsD-z-WFh4kLD_PGD2LN38uIp0oPuOdXiWTpYMeRu7VLZGek_2HjeSK6qApm6AZRsIaWpFY9Nrys0U2ZgeCiF4LVYOjnNiVoZLpvUi1sCvQHKscTVqxeVY"
+    }
+  },
+  "serverPort": 56367
+}

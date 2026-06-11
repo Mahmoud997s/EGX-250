@@ -1,0 +1,8 @@
+node_modules/
+credentials.json
+logs/*
+!logs/.gitkeep
+data/*
+!data/.gitkeep
+state/*
+!state/.gitkeep

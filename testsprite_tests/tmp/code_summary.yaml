@@ -1,0 +1,34 @@
+version: "2"
+type: backend
+tech_stack:
+  - Node.js
+  - Javascript
+  - Express
+  - Playwright
+features:
+  - name: EGX REST API Wrapper
+    description: Express server wrapping the quantitative analysis pipeline
+    files:
+      - server.js
+    endpoints:
+      - method: GET
+        path: /api/status
+        description: Returns the execution state of the pipeline
+        auth_required: false
+        response_schema:
+          "200": "{ state: string, ... }"
+      - method: POST
+        path: /api/run
+        description: Executes the full EGX pipeline synchronously
+        auth_required: false
+        response_schema:
+          "200": "{ success: boolean, stdout: string }"
+          "500": "{ success: boolean, error: string }"
+      - method: GET
+        path: /api/results
+        description: Fetches the final quantitative time intelligence output
+        auth_required: false
+        response_schema:
+          "200": "{ success: boolean, data: Array }"
+          "404": "{ error: string }"
+known_limitations: []

@@ -1,0 +1,35 @@
+name: EGX Daily Scraper
+
+on:
+  schedule:
+    # Runs at 13:00 UTC every day, which is 16:00 (4:00 PM) Egypt Time
+    - cron: '0 13 * * *'
+  workflow_dispatch: # Allows you to run it manually from the GitHub UI
+
+jobs:
+  scrape-and-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Install Playwright Browsers
+      run: npx playwright install chromium --with-deps
+
+    - name: Setup Google Credentials
+      run: |
+        echo "$GCP_CREDENTIALS" > credentials.json
+      env:
+        GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Run Pipeline
+      run: node run_pipeline.js

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "TC001",
+    "title": "get pipeline execution status",
+    "description": "Verify that GET /api/status returns the current execution state of the pipeline with a 200 status code and correct state information such as idle or running."
+  },
+  {
+    "id": "TC002",
+    "title": "run pipeline successfully",
+    "description": "Test that POST /api/run executes the full EGX pipeline synchronously and returns a 200 status with success true and the pipeline stdout after successful completion."
+  },
+  {
+    "id": "TC003",
+    "title": "handle pipeline run failure",
+    "description": "Ensure that POST /api/run returns a 500 status with success false and an appropriate error message when the pipeline fails or an engine exits with a non-zero code."
+  },
+  {
+    "id": "TC004",
+    "title": "prevent concurrent pipeline runs",
+    "description": "Verify that POST /api/run returns a 500 status with success false and an error indicating concurrent execution is blocked when a lock file shows an active pipeline execution."
+  },
+  {
+    "id": "TC005",
+    "title": "retrieve results after successful run",
+    "description": "Confirm that after a successful POST /api/run, GET /api/results returns a 200 status with success true and an array of final time intelligence records."
+  },
+  {
+    "id": "TC006",
+    "title": "handle results retrieval before run",
+    "description": "Check that GET /api/results returns a 404 status with an error message indicating results are unavailable if no successful pipeline execution has occurred yet."
+  }
+]
