@@ -3,7 +3,6 @@ const path = require('path');
 const { google } = require('googleapis');
 
 const SPREADSHEET_ID = '1t1VhMs3T8_cI0d_ogcDvOw3uLHYei-rJeY0ukc0zex0';
-const SHEET_NAME = 'اليومي'; // RTL Daily Sheet
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 
 // Paths to our local data files
@@ -119,7 +118,42 @@ async function syncToGoogleSheets() {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
-    // 5. Append to Sheet
+    // 5. Ensure Sheet exists
+    const SHEET_NAME = todayStr;
+    console.log(`[SYNC] Preparing sheet: ${SHEET_NAME}...`);
+    try {
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId: SPREADSHEET_ID,
+            requestBody: {
+                requests: [{
+                    addSheet: {
+                        properties: {
+                            title: SHEET_NAME,
+                            rightToLeft: true
+                        }
+                    }
+                }]
+            }
+        });
+        console.log(`[SYNC] Created new sheet for today: ${SHEET_NAME}`);
+        
+        // Add Headers if newly created
+        const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه", "التقييم", "الحالة"];
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${SHEET_NAME}!A1:O1`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values: [headers] }
+        });
+    } catch (e) {
+        if (e.message.includes('already exists')) {
+            console.log(`[SYNC] Sheet ${SHEET_NAME} already exists. Appending...`);
+        } else {
+            console.error(`[ERROR] Failed to create sheet:`, e.message);
+        }
+    }
+
+    // 6. Append to Sheet
     console.log(`[SYNC] Appending ${rowsToAppend.length} rows to sheet: ${SHEET_NAME}...`);
     try {
         const response = await sheets.spreadsheets.values.append({
