@@ -67,8 +67,8 @@ if (modeArg === 'phase1') {
     console.log(`[MODE] Phase 2: Staging (Headless, ${MAX_SYMBOLS} symbols)`);
 } else {
     IS_HEADLESS = true;
-    MAX_SYMBOLS = 250;
-    console.log(`[MODE] Phase 3: Production (Headless, 250+ symbols)`);
+    MAX_SYMBOLS = 1000; // Allow processing of ALL symbols in the file
+    console.log(`[MODE] Phase 3: Production (Headless, All symbols)`);
 }
 
 // --- Data Normalization & Validation ---
