@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
+const { fetchSmartIndicators } = require('./fetch_smart_indicators');
 
 // --- Configuration & Constants ---
 const CONFIG = {
@@ -258,6 +259,9 @@ async function runWorkerQueue(browser, symbols, currentConcurrency) {
 // --- Main Orchestrator ---
 (async () => {
     console.log('--- EGX Orchestrator Started ---');
+    console.log('\n[STEP] Fetching Smart Indicators (Whales, RSI, Squeeze)...');
+    await fetchSmartIndicators();
+    
     // Ensure output and log exist if not resuming
     const checkpointedSymbols = loadCheckpoint();
     if (checkpointedSymbols.length === 0) {

@@ -7,6 +7,7 @@ const CHAT_ID = '1964530050'; // Mahmoud's Chat ID
 const TIME_INTEL_FILE = path.join(__dirname, 'data', 'time_intelligence.jsonl');
 const LEVELS_FILE = path.join(__dirname, 'data', 'levels.jsonl');
 const TRANSLATIONS_FILE = path.join(__dirname, 'config', 'translations.json');
+const SMART_FILE = path.join(__dirname, 'data', 'smart_indicators.jsonl');
 
 let TRANSLATIONS = { names: {} };
 if (fs.existsSync(TRANSLATIONS_FILE)) {
@@ -41,6 +42,16 @@ async function sendTelegramAlert() {
         levelsMap[record.symbol] = record.levels || {};
     }
 
+    const smartIndicators = {};
+    if (fs.existsSync(SMART_FILE)) {
+        const smartLines = fs.readFileSync(SMART_FILE, 'utf8').trim().split('\n');
+        for (const line of smartLines) {
+            if (!line) continue;
+            const ind = JSON.parse(line);
+            smartIndicators[ind.symbol] = ind;
+        }
+    }
+
     const allStocks = [];
     for (const line of intelLines) {
         if (!line) continue;
@@ -66,6 +77,16 @@ async function sendTelegramAlert() {
         .sort((a, b) => (a.daily?.score || 0) - (b.daily?.score || 0)) // lowest first
         .slice(0, 3); // top 3 riskiest
 
+    // Smart Indicators Snipes
+    const topSnipes = [];
+    for (const sym in smartIndicators) {
+        const ind = smartIndicators[sym];
+        if (ind.whaleRadar && ind.whaleRadar.includes('استثنائية')) topSnipes.push({ sym, reason: 'سيولة استثنائية 🐋' });
+        else if (ind.squeeze && ind.squeeze.includes('انكماش')) topSnipes.push({ sym, reason: 'تجميع قوي 💥' });
+        else if (ind.bottomCatcher && ind.bottomCatcher.includes('تشبع بيعي')) topSnipes.push({ sym, reason: 'تشبع بيعي 🪝' });
+        else if (ind.goldenCross && ind.goldenCross.includes('تقاطع ذهبي')) topSnipes.push({ sym, reason: 'تقاطع ذهبي 👑' });
+    }
+
     // 3. Format Message
     const dateStr = new Date().toISOString().split('T')[0];
     const RLM = '\u200F'; // Right-to-Left Mark to force RTL direction in Telegram
@@ -80,6 +101,16 @@ async function sendTelegramAlert() {
     messageText += `${RLM}📌 *حالة السوق العامة:*\n`;
     messageText += `${RLM}🛒 مناطق الشراء: ${accCount} سهم\n`;
     messageText += `${RLM}💸 مناطق البيع: ${distCount} سهم\n\n`;
+
+    if (topSnipes.length > 0) {
+        messageText += `${RLM}🔥 *أهم لقطات السوق اليوم:*\n`;
+        // Limit to top 15 alerts to avoid giant messages
+        topSnipes.slice(0, 15).forEach(s => {
+            const arName = TRANSLATIONS.names[s.sym] || s.sym;
+            messageText += `${RLM}• *${arName}*: ${s.reason}\n`;
+        });
+        messageText += `\n`;
+    }
 
     if (accumulation.length > 0) {
         messageText += `${RLM}🟢 *أفضل فرص الشراء (أعلى تقييم):*\n`;

@@ -35,6 +35,17 @@ async function syncToGoogleSheets() {
     }
 
     // 1. Read and parse levels.jsonl
+    let smartIndicators = {};
+    try {
+        const smartLines = fs.readFileSync(path.join(__dirname, 'data', 'smart_indicators.jsonl'), 'utf8').trim().split('\n');
+        for (const line of smartLines) {
+            if (!line) continue;
+            const ind = JSON.parse(line);
+            smartIndicators[ind.symbol] = ind;
+        }
+    } catch (err) {
+        console.warn("[WARNING] Could not load smart_indicators.jsonl. Indicators will be missing.");
+    }
     const levelsData = {};
     const levelsLines = fs.readFileSync(LEVELS_FILE, 'utf8').trim().split('\n');
     for (const line of levelsLines) {
@@ -93,6 +104,13 @@ async function syncToGoogleSheets() {
         const regime = TRANSLATIONS.regime[rawRegime] || rawRegime;
         const companyName = TRANSLATIONS.names[symbol] || symbol;
 
+        const smart = smartIndicators[symbol] || {};
+        const consensus = smart.consensus || "غير متوفر";
+        const whaleRadar = smart.whaleRadar || "غير متوفر";
+        const squeeze = smart.squeeze || "غير متوفر";
+        const bottomCatcher = smart.bottomCatcher || "غير متوفر";
+        const goldenCross = smart.goldenCross || "غير متوفر";
+
         rowsToAppend.push([
             todayStr,
             companyName,
@@ -112,6 +130,11 @@ async function syncToGoogleSheets() {
             scoreWeekly,
             biasMonthly,
             scoreMonthly,
+            consensus,
+            whaleRadar,
+            squeeze,
+            bottomCatcher,
+            goldenCross,
             regime
         ]);
     }
@@ -173,10 +196,10 @@ async function syncToGoogleSheets() {
                 console.log(`[SYNC] Created new blank sheet for today: ${SHEET_NAME}`);
                 
                 // Add Headers if newly created
-                const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه (يومي)", "التقييم (يومي)", "الاتجاه (أسبوعي)", "التقييم (أسبوعي)", "الاتجاه (شهري)", "التقييم (شهري)", "الحالة"];
+                const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه (يومي)", "التقييم (يومي)", "الاتجاه (أسبوعي)", "التقييم (أسبوعي)", "الاتجاه (شهري)", "التقييم (شهري)", "إجماع المؤشرات", "مؤشر السيولة", "الانفجار السعري", "مؤشر القيعان", "التقاطع الذهبي", "الحالة"];
                 await sheets.spreadsheets.values.append({
                     spreadsheetId: SPREADSHEET_ID,
-                    range: `${SHEET_NAME}!A1:S1`,
+                    range: `${SHEET_NAME}!A1:X1`,
                     valueInputOption: 'USER_ENTERED',
                     requestBody: { values: [headers] }
                 });
@@ -193,7 +216,7 @@ async function syncToGoogleSheets() {
     try {
         const response = await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:S`,
+            range: `${SHEET_NAME}!A:X`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: rowsToAppend
