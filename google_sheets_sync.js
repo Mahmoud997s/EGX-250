@@ -77,11 +77,19 @@ async function syncToGoogleSheets() {
         const lowPrice = level.baseData?.low || '-';
         const closePrice = level.baseData?.close || '-';
         
-        const rawBias = intel.daily?.bias || 'UNKNOWN';
+        const rawBiasDaily = intel.daily?.bias || 'UNKNOWN';
+        const rawBiasWeekly = intel.weekly?.bias || 'UNKNOWN';
+        const rawBiasMonthly = intel.monthly?.bias || 'UNKNOWN';
         const rawRegime = intel.timeIntelligence?.marketRegime || 'UNKNOWN';
 
-        const bias = TRANSLATIONS.bias[rawBias] || rawBias;
-        const score = intel.daily?.score || 0;
+        const biasDaily = TRANSLATIONS.bias[rawBiasDaily] || rawBiasDaily;
+        const biasWeekly = TRANSLATIONS.bias[rawBiasWeekly] || rawBiasWeekly;
+        const biasMonthly = TRANSLATIONS.bias[rawBiasMonthly] || rawBiasMonthly;
+        
+        const scoreDaily = intel.daily?.score || 0;
+        const scoreWeekly = intel.weekly?.score || 0;
+        const scoreMonthly = intel.monthly?.score || 0;
+        
         const regime = TRANSLATIONS.regime[rawRegime] || rawRegime;
         const companyName = TRANSLATIONS.names[symbol] || symbol;
 
@@ -98,8 +106,12 @@ async function syncToGoogleSheets() {
             r2,
             s1,
             s2,
-            bias,
-            score,
+            biasDaily,
+            scoreDaily,
+            biasWeekly,
+            scoreWeekly,
+            biasMonthly,
+            scoreMonthly,
             regime
         ]);
     }
@@ -161,10 +173,10 @@ async function syncToGoogleSheets() {
                 console.log(`[SYNC] Created new blank sheet for today: ${SHEET_NAME}`);
                 
                 // Add Headers if newly created
-                const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه", "التقييم", "الحالة"];
+                const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه (يومي)", "التقييم (يومي)", "الاتجاه (أسبوعي)", "التقييم (أسبوعي)", "الاتجاه (شهري)", "التقييم (شهري)", "الحالة"];
                 await sheets.spreadsheets.values.append({
                     spreadsheetId: SPREADSHEET_ID,
-                    range: `${SHEET_NAME}!A1:O1`,
+                    range: `${SHEET_NAME}!A1:S1`,
                     valueInputOption: 'USER_ENTERED',
                     requestBody: { values: [headers] }
                 });
@@ -181,7 +193,7 @@ async function syncToGoogleSheets() {
     try {
         const response = await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:O`,
+            range: `${SHEET_NAME}!A:S`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: rowsToAppend
