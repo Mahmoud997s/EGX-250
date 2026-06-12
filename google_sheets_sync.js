@@ -124,7 +124,7 @@ async function syncToGoogleSheets() {
     try {
         const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
         const existingSheets = meta.data.sheets;
-        const templateSheet = existingSheets.find(s => s.properties.title === 'Template' || s.properties.title === 'القالب');
+        const templateSheet = existingSheets.find(s => s.properties.title === 'Template' || s.properties.title === 'القالب') || existingSheets[0];
         const todaySheet = existingSheets.find(s => s.properties.title === SHEET_NAME);
 
         if (!todaySheet) {
@@ -142,7 +142,7 @@ async function syncToGoogleSheets() {
                         }]
                     }
                 });
-                console.log(`[SYNC] Duplicated 'Template' sheet for today: ${SHEET_NAME}`);
+                console.log(`[SYNC] Duplicated template sheet '${templateSheet.properties.title}' for today: ${SHEET_NAME}`);
             } else {
                 // Create a blank sheet with RTL
                 await sheets.spreadsheets.batchUpdate({
