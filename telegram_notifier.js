@@ -6,6 +6,16 @@ const CHAT_ID = '1964530050'; // Mahmoud's Chat ID
 
 const TIME_INTEL_FILE = path.join(__dirname, 'data', 'time_intelligence.jsonl');
 const LEVELS_FILE = path.join(__dirname, 'data', 'levels.jsonl');
+const TRANSLATIONS_FILE = path.join(__dirname, 'config', 'translations.json');
+
+let TRANSLATIONS = { names: {} };
+if (fs.existsSync(TRANSLATIONS_FILE)) {
+    try {
+        TRANSLATIONS = JSON.parse(fs.readFileSync(TRANSLATIONS_FILE, 'utf8'));
+    } catch (e) {
+        console.error("Failed to parse translations.json:", e);
+    }
+}
 
 async function sendTelegramAlert() {
     if (!CHAT_ID) {
@@ -82,7 +92,8 @@ async function sendTelegramAlert() {
             const score = String(s.daily?.score || 0).padEnd(5, ' ');
             const sym = s.symbol.padEnd(5, ' ');
             const pvt = String(pivot).padEnd(6, ' ');
-            messageText += `${sym}  | ${score}   | ${pvt}   | ${s1}\n`;
+            const arName = TRANSLATIONS.names[s.symbol] || s.symbol;
+            messageText += `${arName} | ${score}   | ${pvt}   | ${s1}\n`;
         });
         messageText += `\`\`\`\n`;
     }
@@ -98,7 +109,8 @@ async function sendTelegramAlert() {
             const score = String(s.daily?.score || 0).padEnd(5, ' ');
             const sym = s.symbol.padEnd(5, ' ');
             const pvt = String(pivot).padEnd(6, ' ');
-            messageText += `${sym}  | ${score}   | ${pvt}   | ${r1}\n`;
+            const arName = TRANSLATIONS.names[s.symbol] || s.symbol;
+            messageText += `${arName} | ${score}   | ${pvt}   | ${r1}\n`;
         });
         messageText += `\`\`\`\n`;
     }

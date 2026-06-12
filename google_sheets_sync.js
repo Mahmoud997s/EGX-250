@@ -10,59 +10,16 @@ const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 const LEVELS_FILE = path.join(__dirname, 'data', 'levels.jsonl');
 const TIME_INTEL_FILE = path.join(__dirname, 'data', 'time_intelligence.jsonl');
 
-// Arabic Translations
-const TRANSLATIONS = {
-    bias: {
-        'BULLISH': 'صاعد بقوة 🚀',
-        'WEAK_BULL': 'صعود ضعيف 📈',
-        'NEUTRAL': 'محايد ➖',
-        'WEAK_BEAR': 'هبوط ضعيف 📉',
-        'BEARISH': 'هابط بقوة ⚠️'
-    },
-    regime: {
-        'ACCUMULATION': 'شراء (فرصة) 🛒',
-        'DISTRIBUTION': 'بيع (حذر) 💸',
-        'TRANSITIONING': 'مرحلة انتقالية ⏳',
-        'UNKNOWN': 'غير واضح ❓'
+// Load Translations
+const TRANSLATIONS_FILE = path.join(__dirname, 'config', 'translations.json');
+let TRANSLATIONS = { bias: {}, regime: {}, names: {} };
+if (fs.existsSync(TRANSLATIONS_FILE)) {
+    try {
+        TRANSLATIONS = JSON.parse(fs.readFileSync(TRANSLATIONS_FILE, 'utf8'));
+    } catch (e) {
+        console.error("Failed to parse translations.json:", e);
     }
-};
-
-const EGX_NAMES = {
-    'ISPH': 'ابن سينا فارما',
-    'ABUK': 'أبو قير للأسمدة',
-    'EMFD': 'إعمار مصر',
-    'AMOC': 'الإسكندرية للزيوت المعدنية (أموك)',
-    'COMI': 'البنك التجاري الدولي (CIB)',
-    'EAST': 'الشرقية (إيسترن كومباني)',
-    'EGCH': 'كيما',
-    'RMDA': 'راميدا',
-    'ARCC': 'العربية للأسمنت',
-    'CCAP': 'القلعة للاستثمارات',
-    'ETEL': 'المصرية للاتصالات',
-    'ORWE': 'النساجون الشرقيون',
-    'ORAS': 'أوراسكوم كونستراكشون',
-    'OIH': 'أوراسكوم للاستثمار',
-    'ORHD': 'أوراسكوم للتنمية مصر',
-    'EFIH': 'إي فاينانس',
-    'EFID': 'إيديتا',
-    'PHDC': 'بالم هيلز للتعمير',
-    'BTFH': 'بلتون القابضة',
-    'JUFO': 'جهينة',
-    'GBCO': 'جي بي كوربوريشن',
-    'RAYA': 'راية القابضة',
-    'VLMR': 'فالمور القابضة',
-    'FWRY': 'فوري',
-    'HRHO': 'مجموعة إي إف جي (هيرميس)',
-    'TMGH': 'مجموعة طلعت مصطفى',
-    'HELI': 'مصر الجديدة للإسكان',
-    'MCQE': 'مصر للأسمنت - قنا',
-    'EGAL': 'مصر للألومنيوم',
-    'ADIB': 'مصرف أبو ظبي الإسلامي',
-    'ALCN': 'الإسكندرية لتداول الحاويات',
-    'SWDY': 'السويدي إلكتريك',
-    'PHAR': 'فاركو للأدوية',
-    'SKPC': 'سيدي كرير للبتروكيماويات'
-};
+}
 
 async function syncToGoogleSheets() {
     console.log("--- EGX Google Sheets Sync Engine Started ---");
@@ -127,7 +84,7 @@ async function syncToGoogleSheets() {
         const bias = TRANSLATIONS.bias[rawBias] || rawBias;
         const score = intel.daily?.score || 0;
         const regime = TRANSLATIONS.regime[rawRegime] || rawRegime;
-        const companyName = EGX_NAMES[symbol] || symbol;
+        const companyName = TRANSLATIONS.names[symbol] || symbol;
 
         rowsToAppend.push([
             todayStr,
