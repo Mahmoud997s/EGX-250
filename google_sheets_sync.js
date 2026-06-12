@@ -122,35 +122,58 @@ async function syncToGoogleSheets() {
     const SHEET_NAME = todayStr;
     console.log(`[SYNC] Preparing sheet: ${SHEET_NAME}...`);
     try {
-        await sheets.spreadsheets.batchUpdate({
-            spreadsheetId: SPREADSHEET_ID,
-            requestBody: {
-                requests: [{
-                    addSheet: {
-                        properties: {
-                            title: SHEET_NAME,
-                            rightToLeft: true
-                        }
+        const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+        const existingSheets = meta.data.sheets;
+        const templateSheet = existingSheets.find(s => s.properties.title === 'Template' || s.properties.title === 'القالب');
+        const todaySheet = existingSheets.find(s => s.properties.title === SHEET_NAME);
+
+        if (!todaySheet) {
+            if (templateSheet) {
+                // Duplicate Template
+                await sheets.spreadsheets.batchUpdate({
+                    spreadsheetId: SPREADSHEET_ID,
+                    requestBody: {
+                        requests: [{
+                            duplicateSheet: {
+                                sourceSheetId: templateSheet.properties.sheetId,
+                                newSheetName: SHEET_NAME,
+                                insertSheetIndex: 1
+                            }
+                        }]
                     }
-                }]
+                });
+                console.log(`[SYNC] Duplicated 'Template' sheet for today: ${SHEET_NAME}`);
+            } else {
+                // Create a blank sheet with RTL
+                await sheets.spreadsheets.batchUpdate({
+                    spreadsheetId: SPREADSHEET_ID,
+                    requestBody: {
+                        requests: [{
+                            addSheet: {
+                                properties: {
+                                    title: SHEET_NAME,
+                                    rightToLeft: true
+                                }
+                            }
+                        }]
+                    }
+                });
+                console.log(`[SYNC] Created new blank sheet for today: ${SHEET_NAME}`);
+                
+                // Add Headers if newly created
+                const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه", "التقييم", "الحالة"];
+                await sheets.spreadsheets.values.append({
+                    spreadsheetId: SPREADSHEET_ID,
+                    range: `${SHEET_NAME}!A1:O1`,
+                    valueInputOption: 'USER_ENTERED',
+                    requestBody: { values: [headers] }
+                });
             }
-        });
-        console.log(`[SYNC] Created new sheet for today: ${SHEET_NAME}`);
-        
-        // Add Headers if newly created
-        const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه", "التقييم", "الحالة"];
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A1:O1`,
-            valueInputOption: 'USER_ENTERED',
-            requestBody: { values: [headers] }
-        });
-    } catch (e) {
-        if (e.message.includes('already exists')) {
-            console.log(`[SYNC] Sheet ${SHEET_NAME} already exists. Appending...`);
         } else {
-            console.error(`[ERROR] Failed to create sheet:`, e.message);
+            console.log(`[SYNC] Sheet ${SHEET_NAME} already exists. Appending...`);
         }
+    } catch (e) {
+        console.error(`[ERROR] Failed during sheet preparation:`, e.message);
     }
 
     // 6. Append to Sheet
