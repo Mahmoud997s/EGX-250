@@ -28,8 +28,8 @@ function computePivotLevels(high, low, close) {
     const r2 = p + (r1 - s1);
     const s2 = p - (r1 - s1);
     
-    const r3 = r1 + 2 * (p - low);
-    const s3 = s1 - 2 * (high - p);
+    const r3 = p + 2 * (r1 - s1);
+    const s3 = p - 2 * (r1 - s1);
     
     const r4 = r3 + (r2 - r1);
     const s4 = s3 - (s1 - s2);
