@@ -3,7 +3,7 @@ name: EGX Daily Scraper
 on:
   schedule:
     # Runs at 13:00 UTC every day, which is 16:00 (4:00 PM) Egypt Time
-    - cron: '0 13 * * *'
+    - cron: '0 13 * * 0-4'
   workflow_dispatch: # Allows you to run it manually from the GitHub UI
 
 jobs:
