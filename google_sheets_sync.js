@@ -80,8 +80,10 @@ async function syncToGoogleSheets() {
         const pivot = level.levels?.pivot ? level.levels.pivot.toFixed(2) : '-';
         const r1 = level.levels?.r1 ? level.levels.r1.toFixed(2) : '-';
         const r2 = level.levels?.r2 ? level.levels.r2.toFixed(2) : '-';
+        const r3 = level.levels?.r3 ? level.levels.r3.toFixed(2) : '-';
         const s1 = level.levels?.s1 ? level.levels.s1.toFixed(2) : '-';
         const s2 = level.levels?.s2 ? level.levels.s2.toFixed(2) : '-';
+        const s3 = level.levels?.s3 ? level.levels.s3.toFixed(2) : '-';
         
         const openPrice = level.baseData?.open || '-';
         const highPrice = level.baseData?.high || '-';
@@ -122,8 +124,10 @@ async function syncToGoogleSheets() {
             pivot,
             r1,
             r2,
+            r3,
             s1,
             s2,
+            s3,
             biasDaily,
             scoreDaily,
             biasWeekly,
@@ -196,10 +200,10 @@ async function syncToGoogleSheets() {
                 console.log(`[SYNC] Created new blank sheet for today: ${SHEET_NAME}`);
                 
                 // Add Headers if newly created
-                const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "دعم 1", "دعم 2", "الاتجاه (يومي)", "التقييم (يومي)", "الاتجاه (أسبوعي)", "التقييم (أسبوعي)", "الاتجاه (شهري)", "التقييم (شهري)", "إجماع المؤشرات", "مؤشر السيولة", "الانفجار السعري", "مؤشر القيعان", "التقاطع الذهبي", "الحالة"];
+                const headers = ["التاريخ", "اسم الشركة", "الرمز", "الإغلاق", "الافتتاح", "الأعلى", "الأدنى", "الارتكاز", "مقاومة 1", "مقاومة 2", "مقاومة 3", "دعم 1", "دعم 2", "دعم 3", "الاتجاه (يومي)", "التقييم (يومي)", "الاتجاه (أسبوعي)", "التقييم (أسبوعي)", "الاتجاه (شهري)", "التقييم (شهري)", "إجماع المؤشرات", "مؤشر السيولة", "الانفجار السعري", "مؤشر القيعان", "التقاطع الذهبي", "الحالة"];
                 await sheets.spreadsheets.values.append({
                     spreadsheetId: SPREADSHEET_ID,
-                    range: `${SHEET_NAME}!A1:X1`,
+                    range: `${SHEET_NAME}!A1:Z1`,
                     valueInputOption: 'USER_ENTERED',
                     requestBody: { values: [headers] }
                 });
@@ -216,7 +220,7 @@ async function syncToGoogleSheets() {
     try {
         const response = await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:X`,
+            range: `${SHEET_NAME}!A:Z`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: rowsToAppend
